@@ -30,18 +30,22 @@ def log(text: str):
 def _timestamp() -> str:
     return time.strftime("%Y-%m-%d %H:%M:%S")
 
-def print_membership_info():
+def print_membership_info(communicate_with_gfd):
 
     global membership, member_count
 
     member_count = len(membership) 
 
-    if member_count > 0:
-
-        log(f"\033[32m[{_timestamp()}] RM: {member_count} members: {' '.join(membership)}\033[0m")
-
+    if communicate_with_gfd:
+       if member_count > 0:
+           log(f"\033[32m[{_timestamp()}] Communicate with GFD: RM: {member_count} members: {' '.join(membership)}\033[0m")
+       else:
+           log(f"\033[32m[{_timestamp()}] Communicate with GFD: RM: {member_count} members\033[0m")
     else:
-        log(f"\033[32m[{_timestamp()}] RM: {member_count} members\033[0m")
+       if member_count > 0:
+           log(f"\033[32m[{_timestamp()}] RM: {member_count} members: {' '.join(membership)}\033[0m")
+       else:
+           log(f"\033[32m[{_timestamp()}] RM: {member_count} members\033[0m")
     
 
 
@@ -81,7 +85,7 @@ class RMHandler(BaseHTTPRequestHandler):
             global membership
             membership = received_membership
 
-            print_membership_info()
+            print_membership_info(True)
 
             self._set_headers(200)
             self.wfile.write(json.dumps({"ack_msg": "membership updated"}).encode())
@@ -98,14 +102,14 @@ class RMHandler(BaseHTTPRequestHandler):
 def main():
     parser = argparse.ArgumentParser(description="Replication Manager server (RM)")
     parser.add_argument("--host", default="0.0.0.0", help="RM host IP (default 0.0.0.0)")
-    parser.add_argument("--port", type=int, default=8090, help="RM port number (default 8080)")
+    parser.add_argument("--port", type=int, default=8090, help="RM port number (default 8090)")
     args = parser.parse_args()
 
     server = HTTPServer((args.host, args.port), RMHandler)
 
 
     log(f"[{_timestamp()}] RM listening on {args.host}:{args.port}")
-    print_membership_info()
+    print_membership_info(False)
 
     try:
         server.serve_forever()

@@ -97,7 +97,7 @@ class Client:
                     pass
             if connected in self.connections:
                 self.primary = connected
-                self.log(f"[{self._timestamp()}] {self.client_id}: Primary is {self.primary}")
+                self.log(f"[{self._timestamp()}] {self.client_id}: Primary server is {self.primary}")
             else:
                 self.log(f"[{self._timestamp()}] {self.client_id}: No primary server connections available")
 
@@ -189,7 +189,8 @@ class Client:
                 if replica_id == self.primary:
                     self.log(f"[{self._timestamp()}] Received: <{self.client_id}, {replica_id}, {data.get('counter')}, reply>")
                 else:
-                    self.log(f"[{self._timestamp()}] Received: <{self.client_id}, {replica_id}, {data.get('counter')}, reply discarded>")
+                    # self.log(f"[{self._timestamp()}] Received: <{self.client_id}, {replica_id}, {data.get('counter')}, reply discarded>")
+                    self.log(f"[{self._timestamp()}] request_num {request_num}: Discarded duplicate reply from {replica_id}")
                 return True
             else:
                 if replica_id == self.primary:
@@ -273,7 +274,7 @@ class Client:
                 if replica_id == self.primary:
                     self.log(f"[{self._timestamp()}] Received: <{self.client_id}, {replica_id}, {data.get('counter')}, reply>")
                 else:
-                    self.log(f"[{self._timestamp()}] Received: <{self.client_id}, {replica_id}, {data.get('counter')}, reply discarded>")
+                    self.log(f"[{self._timestamp()}] request_num {request_num}: Discarded duplicate reply from {replica_id}")
                 return data
             else:
                 if replica_id == self.primary:

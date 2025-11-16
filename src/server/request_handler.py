@@ -156,3 +156,9 @@ class CounterRequestHandler(BaseHTTPRequestHandler):
         
         else:
             self._send_json(404, {"error": "not found"})
+    
+    # Handle do HEAD
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
