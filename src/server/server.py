@@ -44,10 +44,15 @@ def main():
 
     if args.is_primary == 1:
         role = Role.PRIMARY
+        i_am_ready = 1
     else:
         role = Role.BACKUP
+        i_am_ready = 0
 
     CounterRequestHandler.role = role
+    CounterRequestHandler.i_am_ready = i_am_ready
+
+    print("\033[94m%s i_am_ready -> %d\033[0m" % (CounterRequestHandler.replica_id, CounterRequestHandler.i_am_ready))
 
     # Start listening
     server = SingleThreadedHTTPServer((args.host, args.port), CounterRequestHandler)

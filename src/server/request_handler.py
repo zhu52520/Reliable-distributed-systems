@@ -20,6 +20,7 @@ class CounterRequestHandler(BaseHTTPRequestHandler):
     replica_id = "S1"
     configuration = Configuration.ACTIVE
     role = Role.PRIMARY
+    i_am_ready = 0
     server_start_time = time.strftime("%Y%m%d_%H:%M:%S")
     # log_file = f"logs/server_{replica_id}_log_{server_start_time}.txt"
     log_file = os.path.join(os.path.dirname(__file__), "..",'..', "logs", f"server_{replica_id}_log_{server_start_time.replace(':','_')}.txt")
@@ -59,7 +60,7 @@ class CounterRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def check_legal(self):
-        if self.configuration == Configuration.ACTIVE or self.role == Role.PRIMARY:
+        if CounterRequestHandler.i_am_ready == 1 and (self.configuration == Configuration.ACTIVE or CounterRequestHandler.role == Role.PRIMARY):
             return True
         return False
 
@@ -144,15 +145,25 @@ class CounterRequestHandler(BaseHTTPRequestHandler):
             self.log_message('%s received checkpoint request: my state value is %d, new checkpoint count is: %d', self.replica_id, value, checkpoint_count, color="\033[0;36m")
             self._send_json(200, {"ok": True, "replica_id": self.replica_id})
 
+            # Mark the server as ready (class attribute) so other handler
+            # instances and the server loop can observe the change.
+            CounterRequestHandler.i_am_ready = 1
+            self.log_message('Update %s i_am_ready -> 1', self.replica_id)
+
         elif self.path == "/select_primary":
+            # Update the class-level role so the change is global.
             CounterRequestHandler.role = Role.PRIMARY
             self.log_message('%s set to PRIMARY by select_primary request', self.replica_id, color="\033[0;36m")
-            self._send_json(200, {"ok": True, "replica_id": self.replica_id, "role": self.role.value})
+            self._send_json(200, {"ok": True, "replica_id": self.replica_id, "role": CounterRequestHandler.role.value})
+            CounterRequestHandler.i_am_ready = 1
+            self.log_message('Update %s i_am_ready -> 1', self.replica_id)
 
         elif self.path == "/select_backup":
             CounterRequestHandler.role = Role.BACKUP
             self.log_message('%s set to BACKUP by select_backup request', self.replica_id, color="\033[0;36m")
-            self._send_json(200, {"ok": True, "replica_id": self.replica_id, "role": self.role.value})
+            self._send_json(200, {"ok": True, "replica_id": self.replica_id, "role": CounterRequestHandler.role.value})
+            CounterRequestHandler.i_am_ready = 0
+            self.log_message('Update %s i_am_ready -> 0', self.replica_id)
         
         else:
             self._send_json(404, {"error": "not found"})
