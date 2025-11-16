@@ -4,13 +4,22 @@ Implementation of fault-tolerant distributed counter with active/passive replica
 ## Usage
 ### GFD
 `python3 src/gfd/gfd.py`
+
 - `--host`: GFD host (default 0.0.0.0)
 - `--port`: GFD port (default 6000)
 - `--timeout`: LFD heartbeat timeout in seconds (default 10.0)
 - `--replica-file`: Path to replica file (default ../server/replica.json)
 
+### RM
+
+`python3 src/rm/rm.py`
+
+- `--host`: RM host (default 0.0.0.0)
+- `--port`: RM port (default 8090)
+
 ### LFD
 `python3 src/lfd/heartbeat_client.py`
+
 - `--host`: Local server host (default: 0.0.0.0)
 - `--port`: Local server port (default: 8080)
 - `--gfd_host`: GFD host (default: 0.0.0.0)
