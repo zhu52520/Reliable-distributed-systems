@@ -4,8 +4,14 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import time
 import os
+import requests
 
 # -------------------- Config & State --------------------
+
+####### start #######
+rm_host = None
+rm_port = None
+#######  end  #######
 
 # lfd_id -> { "server_id": str, "status": str, "last_update": float }
 lfd_status_table = {}
@@ -47,6 +53,21 @@ def _is_lfd_alive(info: dict, now: float) -> bool:
     timed_out = (now - info["last_update"] > TIMEOUT)
     return (info["status"] in ALIVE_STATUSES) and (not timed_out)
 
+####### start #######
+def report_membership_rm(timeout=5):
+
+    rm_membership_url = f"http://{rm_host}:{rm_port}/membership"
+    #print(f"will send membership: {membership}")
+    payload = {
+        "membership": membership,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    try:
+        requests.post(rm_membership_url, json=payload, timeout=timeout)
+    except requests.exceptions.RequestException as e:
+        log(f"\033[33m[{time.strftime('%Y-%m-%d %H:%M:%S')}] WARN: Failed to report status to GFD: {e}\033[0m")
+####### end #######
+
 # -------------------- Membership maintenance --------------------
 
 def recompute_membership_for(server_id: str):
@@ -74,12 +95,18 @@ def recompute_membership_for(server_id: str):
         member_count += 1
         log(f"\033[35m[{_timestamp()}] GFD: Adding server {server_id}...\033[0m")
         log(f"\033[32m[{_timestamp()}] GFD: {member_count} members: {' '.join(membership)}\033[0m")
+        ####### start #######
+        report_membership_rm()
+        ####### end #######
 
     elif (not any_alive) and in_membership:
         membership.remove(server_id)
         member_count -= 1
         log(f"\033[35m[{_timestamp()}] GFD: Deleting server {server_id}...\033[0m")
         log(f"\033[32m[{_timestamp()}] GFD: {member_count} members: {' '.join(membership)}\033[0m")
+        ####### start #######
+        report_membership_rm()
+        ####### end #######
 
 def check_timeouts():
     """
@@ -182,14 +209,29 @@ def main():
     parser = argparse.ArgumentParser(description="GFD Server for LFDs")
     parser.add_argument("--host", default="0.0.0.0", help="GFD host (default 0.0.0.0)")
     parser.add_argument("--port", type=int, default=6000, help="GFD port (default 6000)")
+
+    ####### start #######
+    parser.add_argument("--rm_host", default="0.0.0.0", help="RM host to notify (default 127.0.0.1)")
+    parser.add_argument("--rm_port", type=int, default=8090,help="RM port to notify (default 8090)")
+    #######  end  #######
+
     parser.add_argument("--timeout", type=float, default=10.0, help="LFD heartbeat timeout seconds (default 10.0)")
     args = parser.parse_args()
 
     global TIMEOUT
     TIMEOUT = args.timeout
 
+    ####### start #######
+    global rm_host, rm_port
+    rm_host = args.rm_host
+    rm_port = args.rm_port
+    #######  end  #######
+
     log(f"[{_timestamp()}] Starting GFD at {args.host}:{args.port} with timeout={TIMEOUT}s")
     log(f"\033[32m[{_timestamp()}] GFD: {member_count} members\033[0m")
+    ####### start #######
+    report_membership_rm()
+    ####### end #######
 
     server = HTTPServer((args.host, args.port), GFDHandler)
     server.timeout = 1  # process a request or timeout every 1s
