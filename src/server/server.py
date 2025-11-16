@@ -37,7 +37,7 @@ def main():
     CounterRequestHandler.state_manager = state
     CounterRequestHandler.replica_id = args.replica_id
 
-    if args.configuration == 0:
+    if args.configuration == 1:
         CounterRequestHandler.configuration = Configuration.ACTIVE
     else:
         CounterRequestHandler.configuration = Configuration.PASSIVE
