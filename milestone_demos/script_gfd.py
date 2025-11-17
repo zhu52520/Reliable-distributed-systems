@@ -13,13 +13,15 @@ except:
 
 HOST = config["gfd_host"]
 PORT = config["gfd_port"]
+rm_host = config["gfd_rm_host"]
+rm_port = config["gfd_rm_port"]
 timeout = config["gfd_time_out"]
 
 file_path = os.path.join(os.path.dirname(__file__), "..", "src", "gfd", "gfd.py")
 
 try:
 
-    subprocess.run([sys.executable, file_path, "--host", HOST, "--port", str(PORT),  "--timeout", str(timeout)])
+    subprocess.run([sys.executable, file_path, "--host", HOST, "--port", str(PORT), "--rm_host", str(rm_host), "--rm_port", str(rm_port) , "--timeout", str(timeout)])
 
 except KeyboardInterrupt:
 
