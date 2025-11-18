@@ -65,7 +65,7 @@ def report_membership_rm(timeout=5):
     try:
         requests.post(rm_membership_url, json=payload, timeout=timeout)
     except requests.exceptions.RequestException as e:
-        log(f"\033[33m[{time.strftime('%Y-%m-%d %H:%M:%S')}] WARN: Failed to report status to GFD: {e}\033[0m")
+        log(f"\033[33m[{time.strftime('%Y-%m-%d %H:%M:%S')}] WARN: Failed to report status to RM: {e}\033[0m")
 ####### end #######
 
 # -------------------- Membership maintenance --------------------

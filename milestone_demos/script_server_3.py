@@ -17,6 +17,7 @@ replica_id3 = config["server3_replica_id"]
 state_file3 = config["server3_state_file"]
 checkpoint_freq3 = config["server3_checkpoint_freq"]
 is_primary3 = config["server3_isprimary"]
+configuration = config["server3_configuration"]
 
 backup1_3 = {
     "name": config["server3_backup1_name"],
@@ -41,6 +42,7 @@ try:
         "--replica-id", replica_id3,
         "--state-file", state_file3,
         "--checkpoint-freq", str(checkpoint_freq3),
+        "--configuration", str(configuration),
         "--is-primary", str(is_primary3),
         "--backup1-name", backup1_3["name"],
         "--backup1-host", backup1_3["host"],

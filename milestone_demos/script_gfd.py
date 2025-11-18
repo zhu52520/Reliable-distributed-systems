@@ -5,7 +5,7 @@ import json
 
 
 try:
-    with open(os.path.join(os.path.dirname(__file__), "command_param.json"), "r") as file:
+    with open(os.path.join(os.path.dirname(__file__), "command_param_clients.json"), "r") as file:
         config = json.load(file)
 
 except:
