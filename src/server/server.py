@@ -60,11 +60,11 @@ def main():
     print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] Listening on http://{args.host}:{args.port} as {args.replica_id}\033[0m")
     print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] Endpoints: POST /increase, POST /decrease, GET /get, GET /heartbeat\033[0m")
 
-    # Use the handler's role attribute so role changes can happen at runtime
-    if CounterRequestHandler.role == Role.BACKUP:
-        print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] This replica now is a backup server \033[0m")
-    else:
-        print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] This replica now is a primary server \033[0m")
+    # # Use the handler's role attribute so role changes can happen at runtime
+    # if CounterRequestHandler.role == Role.BACKUP:
+    #     print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] This replica now is a backup server \033[0m")
+    # else:
+    #     print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] This replica now is a primary server \033[0m")
 
     try:
         # Writeup said that the checkpoint_count is 1 at first.

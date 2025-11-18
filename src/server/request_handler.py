@@ -148,7 +148,7 @@ class CounterRequestHandler(BaseHTTPRequestHandler):
             # Mark the server as ready (class attribute) so other handler
             # instances and the server loop can observe the change.
             CounterRequestHandler.i_am_ready = 1
-            self.log_message('Update %s i_am_ready -> 1', self.replica_id)
+            self.log_message('%s i_am_ready: 1', self.replica_id)
 
         elif self.path == "/select_primary":
             # Update the class-level role so the change is global.
@@ -156,14 +156,14 @@ class CounterRequestHandler(BaseHTTPRequestHandler):
             self.log_message('%s set to PRIMARY by select_primary request', self.replica_id, color="\033[0;36m")
             self._send_json(200, {"ok": True, "replica_id": self.replica_id, "role": CounterRequestHandler.role.value})
             CounterRequestHandler.i_am_ready = 1
-            self.log_message('Update %s i_am_ready -> 1', self.replica_id)
+            self.log_message('Update %s i_am_ready -> 1, role -> primary', self.replica_id)
 
         elif self.path == "/select_backup":
             CounterRequestHandler.role = Role.BACKUP
             self.log_message('%s set to BACKUP by select_backup request', self.replica_id, color="\033[0;36m")
             self._send_json(200, {"ok": True, "replica_id": self.replica_id, "role": CounterRequestHandler.role.value})
             CounterRequestHandler.i_am_ready = 0
-            self.log_message('Update %s i_am_ready -> 0', self.replica_id)
+            self.log_message('Update %s i_am_ready -> 0, role -> backup', self.replica_id)
         
         else:
             self._send_json(404, {"error": "not found"})
