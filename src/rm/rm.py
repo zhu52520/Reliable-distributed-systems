@@ -15,7 +15,7 @@ member_count = 0  # int
 
 
 replicas_dic = None
-primary = 'S1'
+primary = None
 configuration = 1
 
 # Log file path
@@ -58,7 +58,8 @@ def who_is_primary():
 
     global primary
 
-    if primary not in membership:
+
+    if primary not in membership or primary == None:
         if len(membership) > 0:
             primary = membership[0]
             for replica_name, addr in replicas_dic.items():
@@ -80,7 +81,7 @@ def who_is_primary():
                         log(f"\033[33m[{time.strftime('%Y-%m-%d %H:%M:%S')}] WARN: Failed to set the back_up: {back_url}\033[0m")
 
             log(f"\033[32m[{_timestamp()}] New Primary: {primary} \033[0m")
-    
+    """
     else:
 
         server_1 = 'S1'
@@ -92,7 +93,8 @@ def who_is_primary():
                 print(f"set {back_url} to backup")
             except requests.exceptions.RequestException as e:
                 log(f"\033[33m[{time.strftime('%Y-%m-%d %H:%M:%S')}] WARN: Failed to set the back_up: {back_url}\033[0m")
-
+    
+    """
 
         
     
