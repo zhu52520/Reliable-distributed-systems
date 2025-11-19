@@ -52,7 +52,8 @@ def main():
     CounterRequestHandler.role = role
     CounterRequestHandler.i_am_ready = i_am_ready
 
-    print("\033[94m%s i_am_ready -> %d\033[0m" % (CounterRequestHandler.replica_id, CounterRequestHandler.i_am_ready))
+    # print("\033[94m%s i_am_ready -> %d\033[0m" % (CounterRequestHandler.replica_id, CounterRequestHandler.i_am_ready))
+    print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] {CounterRequestHandler.replica_id} i_am_ready -> {CounterRequestHandler.i_am_ready}\033[0m")
 
     # Start listening
     server = SingleThreadedHTTPServer((args.host, args.port), CounterRequestHandler)

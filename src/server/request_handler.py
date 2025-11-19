@@ -156,14 +156,14 @@ class CounterRequestHandler(BaseHTTPRequestHandler):
             self.log_message('%s set to PRIMARY by select_primary request', self.replica_id, color="\033[0;36m")
             self._send_json(200, {"ok": True, "replica_id": self.replica_id, "role": CounterRequestHandler.role.value})
             CounterRequestHandler.i_am_ready = 1
-            self.log_message('Update %s i_am_ready -> 1, role -> primary', self.replica_id)
+            self.log_message('Update %s i_am_ready -> 1, role -> PRIMARY', self.replica_id)
 
         elif self.path == "/select_backup":
             CounterRequestHandler.role = Role.BACKUP
             self.log_message('%s set to BACKUP by select_backup request', self.replica_id, color="\033[0;36m")
             self._send_json(200, {"ok": True, "replica_id": self.replica_id, "role": CounterRequestHandler.role.value})
             CounterRequestHandler.i_am_ready = 0
-            self.log_message('Update %s i_am_ready -> 0, role -> backup', self.replica_id)
+            self.log_message('Update %s i_am_ready -> 0, role -> BACKUP', self.replica_id)
         
         else:
             self._send_json(404, {"error": "not found"})
