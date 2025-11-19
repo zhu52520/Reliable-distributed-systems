@@ -81,6 +81,8 @@ def who_is_primary():
                         log(f"\033[33m[{time.strftime('%Y-%m-%d %H:%M:%S')}] WARN: Failed to set the back_up: {back_url}\033[0m")
 
             log(f"\033[32m[{_timestamp()}] New Primary: {primary} \033[0m")
+        else:
+            primary = None
     """
     else:
 
