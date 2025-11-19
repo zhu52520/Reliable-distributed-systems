@@ -100,6 +100,7 @@ class Client:
                 self.log(f"[{self._timestamp()}] {self.client_id}: Primary server is {self.primary}")
             else:
                 self.log(f"[{self._timestamp()}] {self.client_id}: No primary server connections available")
+                time.sleep(2)
 
     def send_request(self, action):
         # Check connections
