@@ -126,6 +126,7 @@ class Client:
         # Ensure the primary connection is alive; if not, try rediscovery.
         if not self._ensure_primary_connection():
             self.log(f"[{self._timestamp()}] {self.client_id}: Primary connection dead; rediscovering primary")
+            time.sleep(1)
             self.primary = None
             self.connect_to_servers()
             if not self.primary or not self._ensure_primary_connection():
@@ -222,6 +223,7 @@ class Client:
         # Ensure the primary connection is alive; if not, try rediscovery.
         if not self._ensure_primary_connection():
             self.log(f"[{self._timestamp()}] {self.client_id}: Primary connection dead; rediscovering primary for get")
+            time.sleep(1)
             self.primary = None
             self.connect_to_servers()
             if not self.primary or not self._ensure_primary_connection():
