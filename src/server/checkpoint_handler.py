@@ -1,6 +1,7 @@
 import time
 import json
 from http.client import HTTPConnection
+from request_handler import CounterRequestHandler
 
 class CheckpointHandler:
     def __init__(self, last_time=None, freq=1.0, state_manager=None, path="/send_checkpoint", curr_replica_id="S1"):
@@ -9,7 +10,6 @@ class CheckpointHandler:
         self.state_manager = state_manager
         self._path = path
         self.connections = {}
-        self.checkpoint_count = 1
         self.curr_replica_id = curr_replica_id
 
     def _should_send(self, now_wall):
@@ -55,7 +55,7 @@ class CheckpointHandler:
                     "replica_id": replica_id,
                     "timestamp": wall_ts,
                     "state": self.state_manager.get(),
-                    "checkpoint_count": self.checkpoint_count
+                    "checkpoint_count": CounterRequestHandler.checkpoint_count
                 }
                 body = json.dumps(message_data)
 
@@ -66,7 +66,7 @@ class CheckpointHandler:
                     body=body,
                     headers={"Content-Type": "application/json"},
                 )
-                print(f"\033[94m[{wall_ts}] Sent checkpoint: <{primary_id} -> {replica_id}>, state is: {self.state_manager.get()}, checkpoint counter is: {self.checkpoint_count}\033[0m")
+                print(f"\033[94m[{wall_ts}] Sent checkpoint: <{primary_id} -> {replica_id}>, state is: {self.state_manager.get()}, checkpoint counter is: {CounterRequestHandler.checkpoint_count}\033[0m")
 
                 # Read and parse response
                 resp = conn.getresponse()
@@ -86,6 +86,6 @@ class CheckpointHandler:
                 print(f"\033[91m[{wall_ts}] {primary_id}: Failed to send checkpoint to {replica_id}: {e}\033[0m")
                 self._drop_connection(replica_id)
 
-        self.checkpoint_count += 1
+        CounterRequestHandler.checkpoint_count += 1
 
         return results
