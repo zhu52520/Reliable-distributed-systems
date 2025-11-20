@@ -37,17 +37,23 @@ def main():
     CounterRequestHandler.state_manager = state
     CounterRequestHandler.replica_id = args.replica_id
 
-    if args.configuration == 0:
+    if args.configuration == 1:
         CounterRequestHandler.configuration = Configuration.ACTIVE
     else:
         CounterRequestHandler.configuration = Configuration.PASSIVE
 
     if args.is_primary == 1:
         role = Role.PRIMARY
+        i_am_ready = 1
     else:
         role = Role.BACKUP
+        i_am_ready = 0
 
     CounterRequestHandler.role = role
+    CounterRequestHandler.i_am_ready = i_am_ready
+
+    # print("\033[94m%s i_am_ready -> %d\033[0m" % (CounterRequestHandler.replica_id, CounterRequestHandler.i_am_ready))
+    print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] {CounterRequestHandler.replica_id} i_am_ready -> {CounterRequestHandler.i_am_ready}\033[0m")
 
     # Start listening
     server = SingleThreadedHTTPServer((args.host, args.port), CounterRequestHandler)
@@ -55,11 +61,11 @@ def main():
     print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] Listening on http://{args.host}:{args.port} as {args.replica_id}\033[0m")
     print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] Endpoints: POST /increase, POST /decrease, GET /get, GET /heartbeat\033[0m")
 
-    # Use the handler's role attribute so role changes can happen at runtime
-    if CounterRequestHandler.role == Role.BACKUP:
-        print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] This replica now is a backup server \033[0m")
-    else:
-        print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] This replica now is a primary server \033[0m")
+    # # Use the handler's role attribute so role changes can happen at runtime
+    # if CounterRequestHandler.role == Role.BACKUP:
+    #     print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] This replica now is a backup server \033[0m")
+    # else:
+    #     print(f"\033[94m[{time.strftime('%Y-%m-%d %H:%M:%S')}] This replica now is a primary server \033[0m")
 
     try:
         # Writeup said that the checkpoint_count is 1 at first.
