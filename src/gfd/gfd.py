@@ -147,15 +147,19 @@ class GFDHandler(BaseHTTPRequestHandler):
         if path == "/register":
             lfd_id = data.get("lfd_id")
             server_id = data.get("server_id")
-            if not lfd_id or not server_id:
+            lfd_host = data.get("lfd_host")
+            lfd_port = data.get("lfd_port")
+            if not lfd_id or not server_id or not lfd_host or not lfd_port:
                 self._set_headers(400)
-                self.wfile.write(json.dumps({"error": "missing lfd_id/server_id"}).encode())
+                self.wfile.write(json.dumps({"error": "missing lfd_id/server_id/lfd_host/lfd_host"}).encode())
                 return
 
             # Register as 'registered' (NOT healthy). This will NOT add to membership.
             lfd_status_table[lfd_id] = {
                 "server_id": server_id,
                 "status": "registered",
+                "lfd_host": lfd_host,
+                "lfd_port": lfd_port,
                 "last_update": time.time()
             }
 
@@ -181,6 +185,8 @@ class GFDHandler(BaseHTTPRequestHandler):
             lfd_status_table[lfd_id] = {
                 "server_id": server_id,
                 "status": status,
+                "lfd_host": lfd_status_table.get(lfd_id, {}).get("lfd_host"),
+                "lfd_port": lfd_status_table.get(lfd_id, {}).get("lfd_port"),
                 "last_update": time.time()
             }
 
@@ -193,6 +199,32 @@ class GFDHandler(BaseHTTPRequestHandler):
             self._set_headers(200)
             self.wfile.write(json.dumps({"msg": "status received"}).encode())
             return
+        
+        elif path == "/recover_server":
+            server_id = data.get("server_id")
+            if not server_id:
+                self._set_headers(400)
+                self.wfile.write(json.dumps({"error": "missing server_id"}).encode())
+                return
+
+            log(f"[{_timestamp()}] GFD: Recovery request received for {server_id}")
+
+            # 找到所有对应 server 的 LFD
+            target_lfds = [lfd_id for lfd_id, info in lfd_status_table.items() if info["server_id"] == server_id]
+
+            for lfd_id in target_lfds:
+                # 假设 LFD 提供 /recover 接口
+                lfd_info = lfd_status_table[lfd_id]
+                lfd_host = lfd_info.get("lfd_host")  # 你可能需要在注册时存 host/port
+                lfd_port = lfd_info.get("lfd_port")
+                try:
+                    requests.post(f"http://{lfd_host}:{lfd_port}/recover", json={"server_id": server_id}, timeout=5)
+                    log(f"[{_timestamp()}] GFD: Sent recovery request to {lfd_id} for {server_id}")
+                except requests.exceptions.RequestException as e:
+                    log(f"[{_timestamp()}] WARN: Failed to notify {lfd_id} for recovery: {e}")
+
+            self._set_headers(200)
+            self.wfile.write(json.dumps({"msg": "recovery request sent to LFDs"}).encode())
 
         else:
             self._set_headers(404)

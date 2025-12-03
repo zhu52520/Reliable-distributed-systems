@@ -54,6 +54,27 @@ def print_membership_info(communicate_with_gfd):
        else:
            log(f"\033[32m[{_timestamp()}] RM: {member_count} members\033[0m")
     
+
+def request_recovery_from_gfd(server_id):
+    """RM 通知 GFD 恢复某 server"""
+    global gfd_host, gfd_port
+
+    gfd_url = f"http://{gfd_host}:{gfd_port}/recover_server"
+    payload = {
+        "server_id": server_id,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    try:
+        r = requests.post(gfd_url, json=payload, timeout=5)
+        if r.status_code == 200:
+            log(f"[{_timestamp()}] RM: Recovery request sent for {server_id}")
+        else:
+            log(f"[{_timestamp()}] WARN: GFD recovery request returned {r.status_code}")
+    except requests.exceptions.RequestException as e:
+        log(f"[{_timestamp()}] ERROR: Failed to request recovery from GFD: {e}")
+
+
+    
 def who_is_primary():
 
     global primary
@@ -134,6 +155,11 @@ class RMHandler(BaseHTTPRequestHandler):
                 return
             
             global membership
+
+            for server_id in membership:
+                if server_id not in received_membership:
+                    request_recovery_from_gfd(server_id)
+
             membership = received_membership
 
             if configuration == 0:
@@ -155,7 +181,7 @@ class RMHandler(BaseHTTPRequestHandler):
         
 def main():
 
-    global configuration, replicas_dic
+    global configuration, replicas_dic, gfd_host, gfd_port
 
     parser = argparse.ArgumentParser(description="Replication Manager server (RM)")
     parser.add_argument("--host", default="0.0.0.0", help="RM host IP (default 0.0.0.0)")
@@ -167,6 +193,8 @@ def main():
     parser.add_argument("--s2_port", type=int, default=8081, help="RM port number (default 8090)")
     parser.add_argument("--s3_host", default="0.0.0.0", help="RM host IP (default 0.0.0.0)")
     parser.add_argument("--s3_port", type=int, default=8082, help="RM port number (default 8090)")
+    parser.add_argument("--gfd_host", default="0.0.0.0", help="RM host IP (default 0.0.0.0)")
+    parser.add_argument("--gfd_port", type=int, default=6000, help="RM port number (default 8090)")
     args = parser.parse_args()
 
     s1_host = args.s1_host
@@ -176,6 +204,8 @@ def main():
     s3_host = args.s3_host
     s3_port = args.s3_port
     configuration = args.configuration
+    gfd_host = args.gfd_host
+    gfd_port = args.gfd_port
 
     replicas_dic = {'S1': (s1_host, s1_port), 'S2': (s2_host, s2_port), 'S3':(s3_host, s3_port)}
 
